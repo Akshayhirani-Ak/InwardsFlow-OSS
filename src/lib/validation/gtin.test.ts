@@ -42,7 +42,7 @@ describe('gtin validation', () => {
     expect(isValidGtin('0010-0000-0001-6')).toBe(true);
   });
 
-  it('computes the check digit for the sample invoice's first line', () => {
+  it("computes the check digit for the sample invoice's first line", () => {
     expect(gtinCheckDigit('001000000001')).toBe(6);
   });
 });
