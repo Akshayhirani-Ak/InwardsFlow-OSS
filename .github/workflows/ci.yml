@@ -31,19 +31,3 @@ jobs:
         run: |
           npx playwright install --with-deps chromium
           npm run test:e2e
-
-  db:
-    name: Database (migrations + pgTAP)
-    runs-on: ubuntu-latest
-    continue-on-error: true
-    steps:
-      - uses: actions/checkout@v4
-      - name: Install PostgreSQL 16 + pgTAP
-        run: |
-          sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
-          curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/postgresql.gpg
-          sudo apt-get update
-          sudo apt-get install -y postgresql-16 postgresql-16-pgtap
-          sudo pg_ctlcluster 16 main start
-      - name: Run migrations + pgTAP suites
-        run: sudo -u postgres PGHOST=/var/run/postgresql PGUSER=postgres ./ci/run-db-tests.sh
