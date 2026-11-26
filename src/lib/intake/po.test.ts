@@ -35,7 +35,7 @@ describe('salvagePurchaseOrder', () => {
   });
 
   it('cleans a spaced PO number the way naming does', () => {
-    const { po } = salvagePurchaseOrder({ ...GOOD, po_number: ' 4019 537 ' });
+    const { po } = salvagePurchaseOrder({ ...GOOD, po_number: ' 1000 004 ' });
     expect(po?.po_number).toBe('1000004');
   });
 
