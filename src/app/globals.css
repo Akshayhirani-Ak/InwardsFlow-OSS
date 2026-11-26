@@ -1,0 +1,338 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --canvas: 242 246 251;
+    --surface: 255 255 255;
+    --ink: 8 31 68;
+    --deep: 6 21 49;
+    --secondary: 57 78 105;
+    --muted: 83 102 125;
+    --line: 217 226 236;
+    --edge: 133 150 170;
+    --soft: 234 240 247;
+    --accent: 23 78 166;
+    --pressed: 16 57 121;
+    --selection: 232 240 252;
+    --positive: 11 113 71;
+    --go: 15 163 98;
+    --received: 227 246 237;
+    --warning: 136 70 7;
+    --attention: 255 242 217;
+    --danger: 158 41 73;
+    --damage: 252 236 241;
+  }
+
+  body {
+    background-color: rgb(var(--canvas));
+    color: rgb(var(--ink));
+    font-variant-numeric: tabular-nums lining-nums;
+    font-family: var(--font-sans), 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-sans), 'Poppins', sans-serif;
+  }
+
+  /* Stable widths for compared quantities. */
+  .tabular-nums,
+  [data-tabular-nums="true"] {
+    font-feature-settings: 'tnum' 1, 'lnum' 1;
+    font-variant-numeric: tabular-nums lining-nums;
+  }
+
+  /* Suppress scroll-wheel spin buttons on numeric inputs */
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type="number"] {
+    -moz-appearance: textfield;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgb(var(--soft));
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgb(var(--line));
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgb(var(--edge));
+}
+
+/* Print Stylesheet for Official Goods Received Note (GRN) Manifest */
+@media print {
+  body {
+    background: #FFFFFF !important;
+    color: #000000 !important;
+    font-size: 10pt;
+  }
+
+  header,
+  footer,
+  aside,
+  nav,
+  button,
+  .no-print {
+    display: none !important;
+  }
+
+  #printable-grn-document {
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+    width: 100% !important;
+  }
+
+  table {
+    page-break-inside: auto;
+    width: 100% !important;
+    border-collapse: collapse !important;
+  }
+
+  tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+
+  tfoot {
+    display: table-footer-group;
+  }
+}
+
+/* Keep the counting route in the viewport. Its two content regions own scrolling. */
+@media screen {
+  main:has(> .counting-workbench) {
+    min-height: 0;
+    flex: 1;
+  }
+  .min-h-dvh:has(> main > .counting-workbench) {
+    height: 100dvh;
+    overflow: clip;
+  }
+  .counting-workbench, .counting-workbench > :has(.counting-products) { min-height: 0; }
+  .min-h-dvh:has(> main > .counting-workbench) > footer { display: none; }
+  .counting-unit { width: clamp(8rem, 18vw, 15rem); }
+
+}
+@media screen and (max-width: 639px) {
+  /* Phone counting layout (rebuilt 24 Nov 2026): the pad's own
+     structure — flex columns, the divided stat band, the total/RECORD
+     row — does the organising now. CSS only sets the two-up stepper
+     grid and honest gaps. The previous nth-child grid hacks that
+     crushed the identity block into a corner and forced the total
+     and RECORD bars into a squeezed grid are gone. */
+  .counting-steppers {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .counting-steppers > :nth-child(n+3) { grid-column: 1 / -1; }
+  .counting-steppers .counting-quick { display: grid; grid-template-columns: repeat(6,minmax(0,1fr)); gap: 4px; }
+  .counting-steppers .counting-quick button { min-width: 44px; padding-inline: 0; }
+  .counting-workbench > div:has(> div > a[href="/dashboard"]) { gap: 2px; }
+
+}
+
+/* 60/40 split density (his ruling, 23 Nov 2026): the counting band is
+   capped at 60% of the workspace at every screen size so the product
+   list keeps its 40%. The band gives up vertical chrome — root padding,
+   the identity block's bottom padding, the controls' top margin —
+   never touch targets (the 48px floor below still applies) and never
+   the total or RECORD bars' content. */
+.counting-pad { padding-top: 4px; padding-bottom: 4px; }
+.counting-pad .counting-controls { margin-top: 0; }
+.counting-pad .counting-identity > div:first-child { padding-bottom: 4px; }
+
+/* Scrollable rows that must not show a scrollbar (app header nav). */
+.no-scrollbar { scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+
+/* Rapid gloved tapping (24 Nov 2026): buttons on the counting
+   workbench never trigger double-tap zoom — operators tap + fast
+   and a zoom mid-count breaks the flow. */
+.counting-workbench button { touch-action: manipulation; }
+
+@media screen {
+  :where(button, select, textarea, input:not([type="hidden"], [type="radio"], [type="checkbox"], [type="file"])) {
+    min-height: 48px;
+  }
+  :where(a[href]) { display: inline-flex; align-items: center; min-height: 48px; }
+  :where(button, a[href]) { min-width: 48px; }
+  label:has(> input[type="checkbox"]), label:has(> input[type="radio"]) {
+    min-height: 48px;
+  }
+  .counting-qc { padding-top: 2px; }
+  .counting-qc-fields { gap: 4px; }
+  @media (max-width: 639px) {
+    .counting-qc { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; }
+    .counting-qc > * { margin: 0; }
+    .counting-qc-fields {
+      display: grid;
+      grid-template-columns: repeat(2,minmax(0,1fr));
+      grid-column: 1 / -1;
+    }
+    .counting-qc-fields > :last-child { grid-column: 1 / -1; }
+    .counting-qc-fields input, .counting-qc-fields select { min-width: 0; }
+  }
+}
+
+/* Design pass (2026-11-23): one visible focus ring for anything the
+   component layer did not explicitly style — focus is never invisible.
+   Utilities that set their own focus treatment override this. */
+@layer base {
+  :focus-visible {
+    outline: 2px solid rgb(var(--accent));
+    outline-offset: 1px;
+  }
+
+  ::selection {
+    background: rgb(var(--selection));
+  }
+
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* Honour reduced motion: decorative animation (pulses, bounces) collapses
+   for users who opt out at the OS level. The loading spinner is carved
+   out — it signals state, and freezing it would misreport a busy app. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .animate-spin {
+    animation-duration: 1.2s !important;
+    animation-iteration-count: infinite !important;
+  }
+}
+
+@media screen and (min-width: 720px) {
+  .min-h-dvh:has(> main > .counting-workbench) > header > div {
+    flex-wrap: nowrap;
+    padding-inline: 8px;
+  }
+  .min-h-dvh:has(> main > .counting-workbench) > header nav {
+    order: 2;
+    flex: 1 1 0;
+    min-width: 0;
+    width: auto;
+    margin: 0;
+    padding-inline: 0;
+    border-top: 0;
+  }
+  .min-h-dvh:has(> main > .counting-workbench) > header nav + div { order: 3; }
+  .counting-workbench .manifest-filters { flex-direction: row; align-items: center; }
+  .counting-workbench .counting-pallet-strip { padding: 4px 8px; }
+  .counting-workbench .counting-pad { padding-inline: 8px; }
+  .counting-workbench .counting-quick { gap: 4px; }
+  .counting-workbench .counting-quick-label { flex-basis: 100%; }
+  .counting-workbench .counting-quick button { min-width: 44px; }
+}
+
+@media screen and (min-width: 720px) and (max-width: 899px) {
+  .counting-workbench .manifest-search-icon { display: none; }
+  .counting-workbench .manifest-search { padding-inline: 4px; }
+  .counting-workbench .counting-pallet-strip > div > div:last-child { gap: 4px; flex-wrap: wrap; }
+  .counting-workbench .counting-quantities > div:not(:first-child) { padding-left: 4px; }
+  .counting-workbench .counting-stepper-column,
+  .counting-workbench .counting-steppers { display: contents; }
+  .counting-workbench .counting-steppers > :not(.counting-quick) { grid-column: 1; }
+  .counting-workbench .counting-exceptions { grid-column: 2; grid-row: 2 / span 2; }
+  .counting-workbench .counting-quick { grid-column: 1 / -1; padding-top: 4px; }
+  .counting-workbench .counting-quick-label { flex-basis: auto; margin-right: 4px; }
+}
+@media screen {
+  .app-navigation { position: sticky; inset-block-start: 0; z-index: 30; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-inline: 16px; color: rgb(var(--ink)); background: rgb(var(--surface)); box-shadow: 0 1px 0 rgb(var(--line)); }
+  .nav-brand { display: flex; align-items: center; gap: 8px; font-size: 18px; font-weight: 600; }
+  .nav-desktop { display: none; }
+  .nav-opener { display: grid; place-items: center; border-radius: 12px; }
+  .nav-sheet { width: min(360px, 100%); height: 100dvh; max-height: 100dvh; max-width: 100%; margin: 0 0 0 auto; padding: 16px 20px; color: rgb(var(--ink)); }
+  .nav-sheet::backdrop { background: rgb(var(--deep) / .45); }
+  .nav-sheet > div, .nav-desktop { flex-direction: column; }
+  .nav-sheet > div { display: flex; min-height: 100%; }
+  .nav-group { margin-block: 16px; }
+  .nav-group p { padding: 0 12px 4px; font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: rgb(var(--muted)); }
+  .nav-group a { display: flex; align-items: center; gap: 12px; padding-inline: 12px; border-radius: 12px; color: rgb(var(--secondary)); font-size: 14px; font-weight: 500; }
+  .nav-group a:hover, .nav-account button:hover, .nav-opener:hover { background: rgb(var(--soft)); }
+  .nav-group a[aria-current] { color: rgb(var(--accent)); background: rgb(var(--selection)); font-weight: 600; }
+  .nav-account { margin-top: auto; border-top: 1px solid rgb(var(--line)); padding-top: 12px; display: flex; flex-wrap: wrap; gap: 4px; font-size: 13px; }
+  .nav-account div { width: 100%; padding-inline: 8px; font-weight: 600; }
+  .nav-account small { display: block; color: rgb(var(--muted)); padding-left: 16px; }
+  .nav-account button { display: flex; align-items: center; justify-content: center; gap: 8px; padding-inline: 8px; border-radius: 12px; }
+  .registry-stat { position: relative; display: grid; gap: 8px; padding: 20px; text-align: left; background: rgb(var(--surface)); border-radius: 16px; box-shadow: 0 4px 20px rgb(var(--ink) / .07); color: rgb(var(--secondary)); }
+  .registry-stat strong { font-family: var(--font-mono), monospace; font-size: 32px; line-height: 1; color: rgb(var(--ink)); }
+  .registry-stat i { position: absolute; right: 16px; bottom: 16px; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 12px; background: rgb(var(--selection)); color: rgb(var(--accent)); }
+  .registry-stat:last-child i { background: rgb(var(--received)); color: rgb(var(--positive)); }
+  .registry-stat[aria-pressed=true] { background: rgb(var(--ink)); color: white; }
+  .registry-stat[aria-pressed=true] strong { color: white; }
+  .registry-stat:hover { box-shadow: 0 8px 28px rgb(var(--ink) / .12); }
+  .app-navigation + main { min-width: 0; }
+  .app-navigation + main :where(h1) { line-height: 1.25; }
+  :focus-visible { outline: 2px solid rgb(var(--accent)); outline-offset: 2px; }
+  .counting-workbench :is(button, select, input:not([type=checkbox])) { min-height: 48px; }
+  .counting-workbench .counting-quick button { min-width: 48px; }
+}
+@media screen and (min-width: 1024px) {
+  .app-navigation[data-floor=false] { position: fixed; inset: 0 auto 0 0; width: 240px; flex-direction: column; align-items: stretch; padding: 20px 16px; overflow-y: auto; }
+  .app-navigation[data-floor=false] .nav-desktop { display: flex; flex: 1; }
+  .app-navigation[data-floor=false] .nav-opener { display: none; }
+  .app-navigation[data-floor=false] ~ :is(main, footer) { margin-left: 240px; }
+}
+@media screen and (min-width: 720px) {
+  .app-navigation[data-floor=true] .nav-desktop { display: flex; flex-direction: row; align-items: center; margin-left: auto; }
+  .app-navigation[data-floor=true] nav, .app-navigation[data-floor=true] .nav-group { display: flex; align-items: center; margin: 0; }
+  .app-navigation[data-floor=true] .nav-group p, .app-navigation[data-floor=true] .nav-desktop .nav-account { display: none; }
+  .app-navigation[data-floor=true] .nav-group a { justify-content: center; }
+}
+@media screen and (min-width: 720px) and (max-width: 1023px) {
+  .app-navigation .nav-desktop { display: flex; flex-direction: row; margin-left: auto; }
+  .app-navigation .nav-desktop nav, .app-navigation .nav-desktop .nav-group { display: flex; margin: 0; }
+  .app-navigation .nav-desktop :is(.nav-group p,.nav-account) { display: none; }
+  .app-navigation .nav-desktop .nav-group a { justify-content: center; }
+  .app-navigation .nav-desktop .nav-group a span { position: absolute; clip-path: inset(50%); width: 1px; height: 1px; overflow: hidden; }
+}
+@media screen and (max-width: 719px) {
+  .app-navigation[data-floor=false] .nav-desktop { display: flex; margin-left: auto; }
+  .app-navigation[data-floor=false] .nav-opener { display: none; }
+  .app-navigation[data-floor=false] .nav-desktop nav { position: fixed; inset: auto 0 0; display: flex; justify-content: space-around; padding-bottom: env(safe-area-inset-bottom); background: rgb(var(--surface)); box-shadow: 0 -1px 0 rgb(var(--line)); }
+  .app-navigation[data-floor=false] .nav-group { display: contents; }
+  .app-navigation[data-floor=false] .nav-group p, .app-navigation[data-floor=false] .nav-account div { display: none; }
+  .app-navigation[data-floor=false] .nav-group a { flex: 1; flex-direction: column; justify-content: center; font-size: 11px; gap: 0; min-width: 44px; padding: 4px 0; border-radius: 0; }
+  .app-navigation[data-floor=false] .nav-account { margin: 0; padding: 0; border: 0; }
+  .app-navigation[data-floor=false] .nav-account button { font-size: 0; gap: 0; }
+  .app-navigation[data-floor=false] ~ footer { margin-bottom: calc(48px + env(safe-area-inset-bottom)); }
+  .registry-stat { padding: 12px; font-size: 13px; }
+  .registry-stat i { display: none; }
+  .counting-steppers .counting-quick { grid-template-columns: repeat(auto-fit,minmax(48px,1fr)); }
+  :where(input,select,textarea):not([type=checkbox]) { font-size: 16px; }
+}
+@media screen and (min-width: 720px) and (min-height: 900px) {
+  .counting-workbench .counting-steppers :is(input:not([type=checkbox]),button) { min-height: clamp(64px,6vh,72px); }
+  .counting-steppers input { font-size: 28px; }
+  .counting-workbench .counting-quick { gap: 8px; padding-block: 16px; }
+  .counting-workbench .counting-quick button { min-width: 64px; }
+  .counting-pad .counting-controls { padding-block: 16px; }
+}
