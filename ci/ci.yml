@@ -1,0 +1,55 @@
+# InwardsFlow CI — Phase 10.
+# INSTALL: copy this file to .github/workflows/ci.yml (see ci/README.md for
+# why this one step is manual) — after that, every push and PR runs it.
+name: CI
+
+on:
+  push:
+    branches: [main, fix/enterprise-hardening]
+  pull_request:
+
+jobs:
+  app:
+    name: App (types, lint, unit, build, smoke)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Typecheck
+        run: npx tsc --noEmit
+      - name: Lint
+        run: npx next lint
+      - name: Unit tests
+        run: npm test
+      - name: Production build
+        run: npm run build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder-anon-key
+      - name: Playwright smoke tests
+        run: |
+          npx playwright install --with-deps chromium
+          npm run test:e2e
+
+  db:
+    name: Database (migrations + pgTAP)
+    runs-on: ubuntu-latest
+    # The pgTAP suites were written against these migrations but their first
+    # full pg_prove run happens here — keep this job informative, not
+    # blocking, until a green run is observed; then remove continue-on-error.
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install PostgreSQL 16 + pgTAP
+        run: |
+          sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+          curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/postgresql.gpg
+          sudo apt-get update
+          sudo apt-get install -y postgresql-16 postgresql-16-pgtap
+          sudo pg_ctlcluster 16 main start
+      - name: Run migrations + pgTAP suites
+        run: sudo -u postgres PGHOST=/var/run/postgresql PGUSER=postgres ./ci/run-db-tests.sh
