@@ -1,0 +1,7 @@
+# InwardsFlow WMS
+User-agent: *
+Disallow: /api/
+Disallow: /workbench/
+Disallow: /intake/
+Disallow: /users/
+Disallow: /audit/
